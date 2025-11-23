@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>懶人應用分享</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Poppins", "Noto Sans TC", sans-serif;
+            background: radial-gradient(circle at top, #a06bff 0%, #3a1f57 40%, #140a23 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            position: relative;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 0 15px rgba(255,255,255,0.5);
+        }
+
+        header p {
+            margin-top: 10px;
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        /* App cards */
+        .apps-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .app-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(6px);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.15);
+            transition: 0.3s;
+        }
+
+        .app-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 0 25px rgba(255,255,255,0.3);
+        }
+
+        .app-title {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .app-desc {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            line-height: 1.4rem;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            background: #b682ff;
+            color: #1b003d;
+            font-weight: 600;
+            text-decoration: none;
+            transition: 0.25s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn:hover {
+            background: #d5a7ff;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            opacity: 0.6;
+            font-size: 0.9rem;
+        }
+
+        /* Login button */
+        .login-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.5);
+            background: rgba(10,0,40,0.6);
+            color: #ffffff;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: 0.25s;
+        }
+
+        .login-btn:hover {
+            background: rgba(176,130,255,0.9);
+            color: #1b003d;
+        }
+
+        /* User menu */
+        .user-menu {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: none;
+        }
+
+        .user-menu-btn {
+            padding: 4px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.5);
+            background: rgba(10,0,40,0.6);
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .user-menu-btn:hover {
+            background: rgba(176,130,255,0.9);
+        }
+
+        .user-menu-list {
+            margin-top: 6px;
+            background: rgba(15,5,45,0.95);
+            border-radius: 12px;
+            padding: 6px 0;
+            box-shadow: 0 0 18px rgba(0,0,0,0.5);
+            min-width: 130px;
+            display: none;
+        }
+
+        .user-menu.open .user-menu-list {
+            display: block;
+        }
+
+        .user-menu-item {
+            width: 100%;
+            padding: 8px 14px;
+            background: transparent;
+            border: none;
+            text-align: left;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .user-menu-item:hover {
+            background: rgba(182,130,255,0.2);
+        }
+
+        /* Login modal */
+        .login-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        .login-modal.open {
+            display: flex;
+        }
+
+        .login-dialog {
+            background: rgba(20,10,50,0.95);
+            padding: 24px 22px 20px;
+            border-radius: 18px;
+            width: min(320px, 90vw);
+            box-shadow: 0 0 25px rgba(0,0,0,0.4);
+        }
+
+        .login-dialog h2 {
+            margin-bottom: 16px;
+            margin-top: 0;
+        }
+
+        .login-dialog label {
+            margin-bottom: 4px;
+            font-size: 0.85rem;
+            display: block;
+        }
+
+        .login-dialog input {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: none;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+        .login-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-close {
+            background: transparent;
+            border: none;
+            color: #bbbbff;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-login {
+            padding: 7px 14px;
+            border-radius: 10px;
+            border: none;
+            background: #b682ff;
+            color: #1b003d;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .btn-login:hover {
+            background: #d5a7ff;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>懶人應用分享</h1>
+    <p>放一些我自己開發的小工具、小專案、小實驗用頁面</p>
+
+    <!-- 未登入時顯示 -->
+    <button class="login-btn" id="openLogin">登入</button>
+
+    <!-- 登入後顯示 -->
+    <div class="user-menu" id="userMenu">
+        <button class="user-menu-btn" id="userMenuBtn">
+            <img id="userAvatar"
+                 src="https://i.imgur.com/4Z8VZ5A.png"
+                 alt="avatar"
+                 style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+        </button>
+        <div class="user-menu-list" id="userMenuList">
+            <button class="user-menu-item" id="menuSettings">Setting</button>
+            <button class="user-menu-item" id="menuLogout">Log out</button>
+        </div>
+    </div>
+</header>
+
+<!-- 登入視窗 -->
+<div class="login-modal" id="loginModal">
+    <div class="login-dialog">
+        <h2>會員登入</h2>
+        <label for="login-username">帳號</label>
+        <input type="text" id="login-username" />
+        <label for="login-password">密碼</label>
+        <input type="password" id="login-password" />
+        <div class="login-actions">
+            <button class="btn-close" id="closeLogin">先不用登入</button>
+            <button class="btn-login">登入</button>
+        </div>
+    </div>
+</div>
+
+<section class="apps-container">
+    <div class="app-card">
+        <div class="app-title">🟣 簡易帳密登入工具</div>
+        <div class="app-desc">
+            簡單帳號密碼登入小工具，支援自動輸入與加密儲存。下載後可直接執行使用。
+        </div>
+        <!-- 把 exe 檔放在跟 index.html 同一個資料夾 -->
+        <a href="帳密登入工具7.0.exe" download class="btn">立即下載</a>
+    </div>
+
+    <div class="app-card">
+        <div class="app-title">🟣 應用程式 2</div>
+        <div class="app-desc">
+            例如：密碼產生器、計算小工具、API 測試工具等等，之後可以再填入實際內容。
+        </div>
+        <a href="#" class="btn">前往使用</a>
+    </div>
+
+    <div class="app-card">
+        <div class="app-title">🟣 應用程式 3</div>
+        <div class="app-desc">
+            之後想新增多少都可以，卡片會自動排版，版面會保持整齊。
+        </div>
+        <a href="#" class="btn">前往使用</a>
+    </div>
+</section>
+
+<footer>
+    © 2025 我的應用程式作品集
+</footer>
+
+<script>
+    const openLoginBtn = document.getElementById('openLogin');
+    const loginModal = document.getElementById('loginModal');
+    const closeLoginBtn = document.getElementById('closeLogin');
+    const loginBtn = document.querySelector('.btn-login');
+    const usernameInput = document.getElementById('login-username');
+    const passwordInput = document.getElementById('login-password');
+    const appButtons = document.querySelectorAll('.apps-container .btn');
+
+    const userMenu = document.getElementById('userMenu');
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userMenuList = document.getElementById('userMenuList');
+    const menuLogout = document.getElementById('menuLogout');
+    const menuSettings = document.getElementById('menuSettings');
+    const userAvatar = document.getElementById('userAvatar');
+
+    // 從設定頁讀取自訂頭像（localStorage）
+    const savedAvatar = localStorage.getItem('avatarDataUrl');
+    if (savedAvatar && userAvatar) {
+        userAvatar.src = savedAvatar;
+    }
+
+    const VALID_USERNAME = 'admin';
+    const DEFAULT_PASSWORD = '1234'; // 初始預設密碼
+
+    // 取得目前有效密碼（如果在設定頁改過，就用 localStorage 的）
+    function getCurrentPassword() {
+        const stored = localStorage.getItem('loginPassword');
+        return stored || DEFAULT_PASSWORD;
+    }
+
+    function setAppsEnabled(enabled) {
+        appButtons.forEach(btn => {
+            if (enabled) {
+                if (btn.dataset.originalText) {
+                    btn.textContent = btn.dataset.originalText;
+                }
+                btn.style.pointerEvents = 'auto';
+                btn.style.opacity = '1';
+            } else {
+                if (!btn.dataset.originalText) {
+                    btn.dataset.originalText = btn.textContent;
+                }
+                btn.textContent = '請先登入';
+                btn.style.pointerEvents = 'none';
+                btn.style.opacity = '0.6';
+            }
+        });
+    }
+
+    function setLoggedInState(isLoggedIn) {
+        if (isLoggedIn) {
+            if (openLoginBtn) {
+                openLoginBtn.style.display = 'none';
+            }
+            if (userMenu) {
+                userMenu.style.display = 'block';
+            }
+            setAppsEnabled(true);
+        } else {
+            if (openLoginBtn) {
+                openLoginBtn.textContent = '登入';
+                openLoginBtn.disabled = false;
+                openLoginBtn.style.opacity = '1';
+                openLoginBtn.style.cursor = 'pointer';
+                openLoginBtn.style.display = 'inline-block';
+            }
+            if (userMenu) {
+                userMenu.style.display = 'none';
+                userMenu.classList.remove('open');
+            }
+            setAppsEnabled(false);
+        }
+    }
+
+    // 初始狀態：從 localStorage 讀取是否已登入
+    const savedLogin = localStorage.getItem('isLoggedIn') === 'true';
+    setLoggedInState(savedLogin);
+
+    if (openLoginBtn && loginModal) {
+        openLoginBtn.addEventListener('click', () => {
+            loginModal.classList.add('open');
+        });
+    }
+
+    if (closeLoginBtn && loginModal) {
+        closeLoginBtn.addEventListener('click', () => {
+            loginModal.classList.remove('open');
+        });
+    }
+
+    if (loginModal) {
+        loginModal.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                loginModal.classList.remove('open');
+            }
+        });
+    }
+
+    if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+            const user = usernameInput.value.trim();
+            const pwd = passwordInput.value.trim();
+
+            if (user === VALID_USERNAME && pwd === getCurrentPassword()) {
+                localStorage.setItem('isLoggedIn', 'true');
+                setLoggedInState(true);
+                loginModal.classList.remove('open');
+                alert('登入成功！');
+            } else {
+                alert('帳號或密碼錯誤');
+            }
+        });
+    }
+
+    // 使用者下拉選單
+    if (userMenuBtn && userMenu) {
+        userMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userMenu.classList.toggle('open');
+        });
+    }
+
+    // 點擊外面關閉下拉選單
+    document.addEventListener('click', () => {
+        if (userMenu) {
+            userMenu.classList.remove('open');
+        }
+    });
+
+    // Log out
+    if (menuLogout) {
+        menuLogout.addEventListener('click', () => {
+            localStorage.removeItem('isLoggedIn');
+            setLoggedInState(false);
+            alert('已登出');
+        });
+    }
+
+    // Setting：導向到設定頁面
+    if (menuSettings) {
+        menuSettings.addEventListener('click', () => {
+            window.location.href = 'settings.html';
+        });
+    }
+</script>
+
+</body>
+</html>

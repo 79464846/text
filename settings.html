@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>設定 | 懶人應用分享</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Poppins", "Noto Sans TC", sans-serif;
+            background: radial-gradient(circle at top, #a06bff 0%, #3a1f57 40%, #140a23 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 20px 20px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #b682ff, #4a2778);
+            box-shadow: 0 0 10px rgba(255,255,255,0.6);
+        }
+
+        .title-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title-text h1 {
+            font-size: 1.4rem;
+            margin: 0;
+        }
+
+        .title-text span {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .back-link {
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.6);
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            backdrop-filter: blur(8px);
+            background: rgba(10,0,40,0.4);
+            transition: 0.25s;
+        }
+
+        .back-link:hover {
+            background: rgba(176,130,255,0.9);
+            color: #1b003d;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 10px auto 40px;
+            padding: 0 20px 30px;
+            position: relative;
+        }
+
+        .settings-layout {
+            display: flex;
+            gap: 20px;
+            min-height: 400px;
+        }
+
+        .settings-sidebar {
+            width: 190px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 16px;
+            padding: 12px 8px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 18px rgba(0,0,0,0.4);
+        }
+
+        .sidebar-title {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin: 0 0 8px 10px;
+        }
+
+        .settings-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .settings-nav li {
+            margin-bottom: 4px;
+        }
+
+        .settings-nav button {
+            width: 100%;
+            text-align: left;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: none;
+            background: transparent;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+        .settings-nav button:hover {
+            background: rgba(182, 130, 255, 0.25);
+        }
+
+        .settings-nav button.active {
+            background: #b682ff;
+            color: #1b003d;
+            font-weight: 600;
+        }
+
+        .settings-content {
+            flex: 1;
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 18px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .settings-pane { display: none; }
+        .settings-pane.active { display: block; }
+
+        .pane-desc {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 18px;
+        }
+
+        .field-row {
+            margin-bottom: 22px;
+        }
+
+        .field-row label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .field-row input[type="text"],
+        .field-row input[type="password"] {
+            max-width: 260px;
+            width: 100%;
+            padding: 7px 10px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            padding: 7px 14px;
+            border-radius: 10px;
+            border: none;
+            background: #b682ff;
+            color: #1b003d;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.25s;
+        }
+
+        .btn-primary:hover {
+            background: #d5a7ff;
+        }
+
+        /* 頭像右上角區塊 */
+        .avatar-area {
+            position: absolute;
+            top: 32px;
+            right: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .avatar-area img {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.7);
+            object-fit: cover;
+        }
+
+        .avatar-area input[type="file"] {
+            font-size: 0.8rem;
+            max-width: 160px;
+        }
+
+        @media (max-width: 768px) {
+            .settings-layout {
+                flex-direction: column;
+            }
+            .settings-sidebar {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .sidebar-title {
+                width: 100%;
+                margin-left: 4px;
+            }
+            .avatar-area {
+                position: static;
+                margin-top: 10px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo-title">
+        <div class="logo-dot"></div>
+        <div class="title-text">
+            <h1>設定</h1>
+            <span>懶人應用分享 · 帳號與偏好</span>
+        </div>
+    </div>
+    <a href="index.html" class="back-link">← 回到主畫面</a>
+</header>
+
+<main>
+    <div class="settings-layout">
+        <aside class="settings-sidebar">
+            <p class="sidebar-title">設定選項</p>
+            <ul class="settings-nav">
+                <li><button class="active" data-target="pane-profile">個人資料</button></li>
+                <li><button data-target="pane-password">密碼更改</button></li>
+                <li><button data-target="pane-others">其他設定</button></li>
+            </ul>
+        </aside>
+
+        <section class="settings-content">
+            <!-- 個人資料 -->
+            <div class="settings-pane active" id="pane-profile">
+                <h2>個人資料</h2>
+                <p class="pane-desc">編輯登入帳號、顯示名稱與頭像。</p>
+
+                <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+                    <div>
+                        <div class="field-row">
+                            <label>登入帳號</label>
+                            <input type="text" value="admin" disabled />
+                        </div>
+                        <div class="field-row">
+                            <label>顯示名稱</label>
+                            <input type="text" id="displayName" placeholder="例如：懶人開發者" />
+                        </div>
+                        <button class="btn-primary" id="btnSaveProfile">儲存個人資料（local）</button>
+                    </div>
+
+                    <!-- 頭像右上角 -->
+                    <div class="avatar-area">
+                        <label>頭像預覽</label>
+                        <img id="avatarPreview" src="https://i.imgur.com/4Z8VZ5A.png" alt="頭像預覽" />
+                        <input type="file" id="avatarFile" accept="image/*" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- 密碼更改 -->
+            <div class="settings-pane" id="pane-password">
+                <h2>密碼更改</h2>
+                <p class="pane-desc">示意區塊，可接登入驗證。</p>
+
+                <div class="field-row">
+                    <label for="old-password">目前密碼</label>
+                    <input type="password" id="old-password" />
+                </div>
+                <div class="field-row">
+                    <label for="new-password">新密碼</label>
+                    <input type="password" id="new-password" />
+                </div>
+                <div class="field-row">
+                    <label for="confirm-password">確認新密碼</label>
+                    <input type="password" id="confirm-password" />
+                </div>
+
+                <button class="btn-primary" id="btnChangePwd">儲存密碼設定</button>
+            </div>
+
+            <!-- 其他設定 -->
+            <div class="settings-pane" id="pane-others">
+                <h2>其他設定</h2>
+                <p class="pane-desc">預留功能，之後可以加下載提醒、主題切換等等。</p>
+            </div>
+        </section>
+    </div>
+</main>
+
+<script>
+    // 左邊選單切換
+    document.querySelectorAll('.settings-nav button').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.settings-nav button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.settings-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(btn.dataset.target).classList.add('active');
+        };
+    });
+
+    // 個人資料
+    const displayNameInput = document.getElementById('displayName');
+    const btnSaveProfile = document.getElementById('btnSaveProfile');
+    const avatarInput = document.getElementById('avatarFile');
+    const avatarPreview = document.getElementById('avatarPreview');
+
+    // 載入顯示名稱
+    const savedName = localStorage.getItem('displayName');
+    if (savedName) {
+        displayNameInput.value = savedName;
+    }
+
+    // 載入頭像
+    const savedAvatar = localStorage.getItem('avatarDataUrl');
+    if (savedAvatar) {
+        avatarPreview.src = savedAvatar;
+    }
+
+    // 儲存顯示名稱
+    btnSaveProfile.onclick = () => {
+        localStorage.setItem('displayName', displayNameInput.value.trim());
+        alert('已儲存個人資料（localStorage）');
+    };
+
+    // 換頭像
+    avatarInput.onchange = () => {
+        const file = avatarInput.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = e => {
+            const data = e.target.result;
+            avatarPreview.src = data;
+            localStorage.setItem('avatarDataUrl', data);
+            alert('頭像已更新（localStorage）');
+        };
+        reader.readAsDataURL(file);
+    };
+
+    // 密碼更改
+    const btnChangePwd = document.getElementById('btnChangePwd');
+    const oldPwdInput = document.getElementById('old-password');
+    const newPwdInput = document.getElementById('new-password');
+    const confirmPwdInput = document.getElementById('confirm-password');
+
+    btnChangePwd.onclick = () => {
+        const storedPwd = localStorage.getItem('loginPassword') || '1234'; // 預設舊密碼 1234
+
+        if (!oldPwdInput.value || !newPwdInput.value || !confirmPwdInput.value) {
+            alert('請把三個欄位都填寫完整');
+            return;
+        }
+
+        if (oldPwdInput.value !== storedPwd) {
+            alert('目前密碼錯誤');
+            return;
+        }
+
+        if (newPwdInput.value !== confirmPwdInput.value) {
+            alert('兩次新密碼不一致');
+            return;
+        }
+
+        // 寫入新的登入密碼
+        localStorage.setItem('loginPassword', newPwdInput.value);
+
+        // 清空欄位
+        oldPwdInput.value = '';
+        newPwdInput.value = '';
+        confirmPwdInput.value = '';
+
+        alert('密碼已更新，下次回到主頁登入請使用新密碼。');
+    };
+</script>
+
+</body>
+</html>
