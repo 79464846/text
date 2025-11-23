@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>建立帳號 | 懶人應用分享</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: "Poppins", "Noto Sans TC", sans-serif;
+            background: radial-gradient(circle at top, #a06bff 0%, #3a1f57 40%, #140a23 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .wrapper {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+        }
+        .card {
+            background: rgba(20, 8, 50, 0.94);
+            border-radius: 18px;
+            padding: 22px 20px 20px;
+            box-shadow: 0 0 24px rgba(0,0,0,0.6);
+        }
+        .title {
+            font-size: 1.4rem;
+            margin: 0 0 6px;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            margin: 0 0 16px;
+        }
+        .field-row {
+            margin-bottom: 16px;
+        }
+        .field-row label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+        .field-row input {
+
+            width: 80%;              /* ✔ 跟登入視窗一模一樣 */
+            max-width: 260px;        /* ✔ 最大長度限制一致 */
+            display: block;          /* ✔ 讓 margin 生效 */
+            margin: 0 0 14px 0;      /* ✔ 靠左，間距一致 */
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.9rem;
+
+    /* 額外補強：避免出現黑邊（你第一張圖的 bug）*/
+            outline: none;           
+            box-sizing: border-box;
+        }
+
+        }
+
+        }
+        .btn-main {
+            width: 100%;
+            padding: 9px 0;
+            border-radius: 999px;
+            border: none;
+            background: #b682ff;
+            color: #1b003d;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            margin-top: 6px;
+            transition: 0.25s;
+        }
+        .btn-main:hover {
+            background: #d5a7ff;
+        }
+        .link-row {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        .link-row a {
+            color: #e0c4ff;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="card">
+        <h1 class="title">建立新帳號</h1>
+        <p class="subtitle">註冊完成後會自動以此帳號登入，並回到首頁。</p>
+
+        <div class="field-row">
+            <label for="reg-username">帳號</label>
+            <input type="text" id="reg-username" placeholder="請輸入帳號">
+        </div>
+        <div class="field-row">
+            <label for="reg-password">密碼</label>
+            <input type="password" id="reg-password" placeholder="請輸入密碼">
+        </div>
+        <div class="field-row">
+            <label for="reg-confirm">確認密碼</label>
+            <input type="password" id="reg-confirm" placeholder="再次輸入密碼">
+        </div>
+
+        <button class="btn-main" id="btnCreate">建立帳號</button>
+
+        <div class="link-row">
+            已有帳號？<a id="backToLogin">回首頁登入</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function loadAccounts() {
+        const raw = localStorage.getItem('accounts');
+        if (!raw) {
+            const defaultAccounts = [{ username: 'admin', password: '1234' }];
+            localStorage.setItem('accounts', JSON.stringify(defaultAccounts));
+            return defaultAccounts;
+        }
+        try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) return parsed;
+            return [];
+        } catch (e) {
+            console.error('accounts 解析失敗', e);
+            return [];
+        }
+    }
+
+    function saveAccounts(list) {
+        localStorage.setItem('accounts', JSON.stringify(list));
+    }
+
+    const btnCreate = document.getElementById('btnCreate');
+    const backToLogin = document.getElementById('backToLogin');
+    const userInput = document.getElementById('reg-username');
+    const pwdInput = document.getElementById('reg-password');
+    const confirmInput = document.getElementById('reg-confirm');
+
+    btnCreate.onclick = () => {
+        const username = userInput.value.trim();
+        const pwd = pwdInput.value;
+        const pwd2 = confirmInput.value;
+
+        if (!username || !pwd || !pwd2) {
+            alert('請把三個欄位都填寫完整');
+            return;
+        }
+        if (pwd !== pwd2) {
+            alert('兩次輸入的密碼不一致');
+            return;
+        }
+
+        let accounts = loadAccounts();
+        if (accounts.find(a => a.username === username)) {
+            alert('此帳號已存在，請換一個名稱');
+            return;
+        }
+
+        accounts.push({ username: username, password: pwd });
+        saveAccounts(accounts);
+
+        // 註冊完成後直接當作登入狀態
+        localStorage.setItem('currentUser', username);
+        localStorage.setItem('isLoggedIn', 'true');
+
+        alert('帳號已建立，將以此帳號登入並回到首頁。');
+        window.location.href = 'index.html';
+    };
+
+    backToLogin.onclick = () => {
+        window.location.href = 'index.html';
+    };
+</script>
+</body>
+</html>

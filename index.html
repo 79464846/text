@@ -33,7 +33,6 @@
             opacity: 0.8;
         }
 
-        /* App cards */
         .apps-container {
             max-width: 1000px;
             margin: 40px auto;
@@ -121,10 +120,37 @@
             top: 20px;
             right: 20px;
             display: none;
+            text-align: right;
+        }
+
+        .user-menu-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .user-info-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            font-size: 0.8rem;
+        }
+
+        .user-info-text span {
+            line-height: 1.2;
+        }
+
+        .user-info-text .user-name {
+            font-weight: 600;
+        }
+
+        .user-info-text .user-tag {
+            opacity: 0.8;
         }
 
         .user-menu-btn {
-            padding: 4px;
+            padding: 2px;
             border-radius: 50%;
             border: 1px solid rgba(255,255,255,0.5);
             background: rgba(10,0,40,0.6);
@@ -136,13 +162,20 @@
             background: rgba(176,130,255,0.9);
         }
 
+        .user-menu-btn img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
         .user-menu-list {
             margin-top: 6px;
             background: rgba(15,5,45,0.95);
             border-radius: 12px;
             padding: 6px 0;
             box-shadow: 0 0 18px rgba(0,0,0,0.5);
-            min-width: 130px;
+            min-width: 140px;
             display: none;
         }
 
@@ -184,13 +217,23 @@
             background: rgba(20,10,50,0.95);
             padding: 24px 22px 20px;
             border-radius: 18px;
-            width: min(320px, 90vw);
+            width: min(360px, 95vw);
             box-shadow: 0 0 25px rgba(0,0,0,0.4);
         }
 
         .login-dialog h2 {
-            margin-bottom: 16px;
+            margin-bottom: 10px;
             margin-top: 0;
+        }
+
+        .login-dialog .login-hint {
+            font-size: 0.82rem;
+            opacity: 0.9;
+            margin-bottom: 14px;
+        }
+
+        .login-dialog .login-hint b {
+            font-weight: 700;
         }
 
         .login-dialog label {
@@ -199,12 +242,15 @@
             display: block;
         }
 
+        /* ★ 版本 C：縮短但靠左，不再置中 ★ */
         .login-dialog input {
-            width: 100%;
+            width: 80%;
+            max-width: 260px;
+            display: block;
+            margin: 0 0 14px 0; /* 左對齊 */
             padding: 8px 10px;
             border-radius: 8px;
             border: none;
-            margin-bottom: 12px;
             font-size: 0.9rem;
         }
 
@@ -213,6 +259,7 @@
             justify-content: space-between;
             align-items: center;
             gap: 8px;
+            margin-top: 6px;
         }
 
         .btn-close {
@@ -237,6 +284,15 @@
         .btn-login:hover {
             background: #d5a7ff;
         }
+
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 2.2rem;
+            }
+            header p {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -250,14 +306,20 @@
 
     <!-- 登入後顯示 -->
     <div class="user-menu" id="userMenu">
-        <button class="user-menu-btn" id="userMenuBtn">
-            <img id="userAvatar"
-                 src="https://i.imgur.com/4Z8VZ5A.png"
-                 alt="avatar"
-                 style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
-        </button>
+        <div class="user-menu-top">
+            <div class="user-info-text">
+                <span class="user-name" id="currentUserLabel"></span>
+                <span class="user-tag">已登入</span>
+            </div>
+            <button class="user-menu-btn" id="userMenuBtn">
+                <img id="userAvatar"
+                     src="https://i.imgur.com/4Z8VZ5A.png"
+                     alt="avatar">
+            </button>
+        </div>
         <div class="user-menu-list" id="userMenuList">
             <button class="user-menu-item" id="menuSettings">Setting</button>
+            <button class="user-menu-item" id="menuSwitch">切換帳號</button>
             <button class="user-menu-item" id="menuLogout">Log out</button>
         </div>
     </div>
@@ -267,12 +329,16 @@
 <div class="login-modal" id="loginModal">
     <div class="login-dialog">
         <h2>會員登入</h2>
+        <div class="login-hint">
+            第一次使用：預設帳號 <b>admin</b> / 密碼 <b>1234</b><br>
+            也可以按左下角 Sign 建立新帳號。
+        </div>
         <label for="login-username">帳號</label>
         <input type="text" id="login-username" />
         <label for="login-password">密碼</label>
         <input type="password" id="login-password" />
         <div class="login-actions">
-            <button class="btn-close" id="closeLogin">先不用登入</button>
+            <button class="btn-close" id="closeLogin">Sign</button>
             <button class="btn-login">登入</button>
         </div>
     </div>
@@ -284,7 +350,6 @@
         <div class="app-desc">
             簡單帳號密碼登入小工具，支援自動輸入與加密儲存。下載後可直接執行使用。
         </div>
-        <!-- 把 exe 檔放在跟 index.html 同一個資料夾 -->
         <a href="帳密登入工具7.0.exe" download class="btn">立即下載</a>
     </div>
 
@@ -323,22 +388,14 @@
     const userMenuList = document.getElementById('userMenuList');
     const menuLogout = document.getElementById('menuLogout');
     const menuSettings = document.getElementById('menuSettings');
+    const menuSwitch = document.getElementById('menuSwitch');
     const userAvatar = document.getElementById('userAvatar');
+    const currentUserLabel = document.getElementById('currentUserLabel');
 
-    // 從設定頁讀取自訂頭像（localStorage）
-    const savedAvatar = localStorage.getItem('avatarDataUrl');
-    if (savedAvatar && userAvatar) {
-        userAvatar.src = savedAvatar;
-    }
+    const VALID_DEFAULT_USERNAME = 'admin';
+    const VALID_DEFAULT_PASSWORD = '1234';
 
-    const VALID_USERNAME = 'admin';
-    const DEFAULT_PASSWORD = '1234'; // 初始預設密碼
-
-    // 取得目前有效密碼（如果在設定頁改過，就用 localStorage 的）
-    function getCurrentPassword() {
-        const stored = localStorage.getItem('loginPassword');
-        return stored || DEFAULT_PASSWORD;
-    }
+    let currentUser = null;
 
     function setAppsEnabled(enabled) {
         appButtons.forEach(btn => {
@@ -359,46 +416,105 @@
         });
     }
 
-    function setLoggedInState(isLoggedIn) {
-        if (isLoggedIn) {
-            if (openLoginBtn) {
-                openLoginBtn.style.display = 'none';
+    function findUser(username) {
+        const raw = localStorage.getItem('users');
+        if (!raw) return null;
+        try {
+            const users = JSON.parse(raw);
+            return users.find(u => u.username === username) || null;
+        } catch {
+            return null;
+        }
+    }
+
+    function saveUser(user) {
+        const raw = localStorage.getItem('users');
+        let users = [];
+        if (raw) {
+            try {
+                users = JSON.parse(raw);
+                if (!Array.isArray(users)) users = [];
+            } catch {
+                users = [];
             }
-            if (userMenu) {
-                userMenu.style.display = 'block';
-            }
+        }
+        const idx = users.findIndex(u => u.username === user.username);
+        if (idx >= 0) {
+            users[idx] = user;
+        } else {
+            users.push(user);
+        }
+        localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    // 載入自訂頭像
+    const savedAvatar = localStorage.getItem('avatarDataUrl');
+    if (savedAvatar && userAvatar) {
+        userAvatar.src = savedAvatar;
+    }
+
+    function setLoggedInState(isLoggedIn, username) {
+        if (isLoggedIn && username) {
+            currentUser = username;
+            localStorage.setItem('currentUser', username);
+            localStorage.setItem('isLoggedIn', 'true');
+            if (openLoginBtn) openLoginBtn.style.display = 'none';
+            if (userMenu) userMenu.style.display = 'block';
+            if (currentUserLabel) currentUserLabel.textContent = username;
             setAppsEnabled(true);
         } else {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            localStorage.setItem('isLoggedIn', 'false');
             if (openLoginBtn) {
-                openLoginBtn.textContent = '登入';
+                openLoginBtn.style.display = 'inline-block';
                 openLoginBtn.disabled = false;
                 openLoginBtn.style.opacity = '1';
                 openLoginBtn.style.cursor = 'pointer';
-                openLoginBtn.style.display = 'inline-block';
             }
             if (userMenu) {
                 userMenu.style.display = 'none';
                 userMenu.classList.remove('open');
             }
+            if (currentUserLabel) currentUserLabel.textContent = '';
             setAppsEnabled(false);
         }
     }
 
-    // 初始狀態：從 localStorage 讀取是否已登入
-    const savedLogin = localStorage.getItem('isLoggedIn') === 'true';
-    setLoggedInState(savedLogin);
+    // 初始化登入狀態
+    (function initLoginState() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        const savedUser = localStorage.getItem('currentUser');
+        if (isLoggedIn && savedUser) {
+            setLoggedInState(true, savedUser);
+        } else {
+            setLoggedInState(false, null);
+        }
+    })();
 
     if (openLoginBtn && loginModal) {
         openLoginBtn.addEventListener('click', () => {
             loginModal.classList.add('open');
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                usernameInput.value = savedUser;
+                passwordInput.value = '';
+                passwordInput.focus();
+            } else {
+                usernameInput.value = '';
+                passwordInput.value = '';
+                usernameInput.focus();
+            }
         });
     }
 
     if (closeLoginBtn && loginModal) {
-        closeLoginBtn.addEventListener('click', () => {
-            loginModal.classList.remove('open');
-        });
-    }
+    closeLoginBtn.addEventListener('click', () => {
+        // 點 Sign 直接前往註冊頁
+        window.location.href = 'create.html';
+    });
+}
+
 
     if (loginModal) {
         loginModal.addEventListener('click', (e) => {
@@ -413,18 +529,34 @@
             const user = usernameInput.value.trim();
             const pwd = passwordInput.value.trim();
 
-            if (user === VALID_USERNAME && pwd === getCurrentPassword()) {
-                localStorage.setItem('isLoggedIn', 'true');
-                setLoggedInState(true);
-                loginModal.classList.remove('open');
-                alert('登入成功！');
-            } else {
-                alert('帳號或密碼錯誤');
+            if (!user || !pwd) {
+                alert('請輸入帳號與密碼');
+                return;
             }
+
+            if (user === VALID_DEFAULT_USERNAME && pwd === VALID_DEFAULT_PASSWORD) {
+                setLoggedInState(true, user);
+                loginModal.classList.remove('open');
+                alert('使用預設帳號登入成功！');
+                return;
+            }
+
+            const found = findUser(user);
+            if (!found) {
+                alert('找不到此帳號，請確認是否輸入正確或使用 Sign 建立。');
+                return;
+            }
+            if (found.password !== pwd) {
+                alert('密碼錯誤');
+                return;
+            }
+
+            setLoggedInState(true, user);
+            loginModal.classList.remove('open');
+            alert(`歡迎回來，${user}！`);
         });
     }
 
-    // 使用者下拉選單
     if (userMenuBtn && userMenu) {
         userMenuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -432,26 +564,29 @@
         });
     }
 
-    // 點擊外面關閉下拉選單
     document.addEventListener('click', () => {
         if (userMenu) {
             userMenu.classList.remove('open');
         }
     });
 
-    // Log out
     if (menuLogout) {
         menuLogout.addEventListener('click', () => {
-            localStorage.removeItem('isLoggedIn');
-            setLoggedInState(false);
+            setLoggedInState(false, null);
             alert('已登出');
         });
     }
 
-    // Setting：導向到設定頁面
     if (menuSettings) {
         menuSettings.addEventListener('click', () => {
             window.location.href = 'settings.html';
+        });
+    }
+
+    if (menuSwitch) {
+        menuSwitch.addEventListener('click', () => {
+            setLoggedInState(false, null);
+            if (loginModal) loginModal.classList.add('open');
         });
     }
 </script>

@@ -185,7 +185,6 @@
             background: #d5a7ff;
         }
 
-        /* 頭像右上角區塊 */
         .avatar-area {
             position: absolute;
             top: 32px;
@@ -207,6 +206,12 @@
         .avatar-area input[type="file"] {
             font-size: 0.8rem;
             max-width: 160px;
+        }
+
+        .current-user-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-bottom: 8px;
         }
 
         @media (max-width: 768px) {
@@ -258,14 +263,10 @@
             <!-- 個人資料 -->
             <div class="settings-pane active" id="pane-profile">
                 <h2>個人資料</h2>
-                <p class="pane-desc">編輯登入帳號、顯示名稱與頭像。</p>
+                <p class="pane-desc">編輯顯示名稱與頭像（目前與登入帳號無綁定，通用設定）。</p>
 
                 <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
                     <div>
-                        <div class="field-row">
-                            <label>登入帳號</label>
-                            <input type="text" value="admin" disabled />
-                        </div>
                         <div class="field-row">
                             <label>顯示名稱</label>
                             <input type="text" id="displayName" placeholder="例如：懶人開發者" />
@@ -273,7 +274,6 @@
                         <button class="btn-primary" id="btnSaveProfile">儲存個人資料（local）</button>
                     </div>
 
-                    <!-- 頭像右上角 -->
                     <div class="avatar-area">
                         <label>頭像預覽</label>
                         <img id="avatarPreview" src="https://i.imgur.com/4Z8VZ5A.png" alt="頭像預覽" />
@@ -285,7 +285,9 @@
             <!-- 密碼更改 -->
             <div class="settings-pane" id="pane-password">
                 <h2>密碼更改</h2>
-                <p class="pane-desc">示意區塊，可接登入驗證。</p>
+                <p class="pane-desc">針對「目前登入的帳號」變更密碼。</p>
+
+                <p class="current-user-label" id="currentUserInfo"></p>
 
                 <div class="field-row">
                     <label for="old-password">目前密碼</label>
@@ -323,35 +325,44 @@
         };
     });
 
-    // 個人資料
+    // 共用帳號處理
+    function loadAccounts() {
+        const raw = localStorage.getItem('accounts');
+        if (!raw) return [];
+        try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) return parsed;
+            return [];
+        } catch (e) {
+            console.error('accounts 解析失敗', e);
+            return [];
+        }
+    }
+
+    function saveAccounts(list) {
+        localStorage.setItem('accounts', JSON.stringify(list));
+    }
+
+    // 個人資料：顯示名稱 + 頭像（全站共用）
     const displayNameInput = document.getElementById('displayName');
     const btnSaveProfile = document.getElementById('btnSaveProfile');
     const avatarInput = document.getElementById('avatarFile');
     const avatarPreview = document.getElementById('avatarPreview');
 
-    // 載入顯示名稱
     const savedName = localStorage.getItem('displayName');
-    if (savedName) {
-        displayNameInput.value = savedName;
-    }
+    if (savedName) displayNameInput.value = savedName;
 
-    // 載入頭像
     const savedAvatar = localStorage.getItem('avatarDataUrl');
-    if (savedAvatar) {
-        avatarPreview.src = savedAvatar;
-    }
+    if (savedAvatar) avatarPreview.src = savedAvatar;
 
-    // 儲存顯示名稱
     btnSaveProfile.onclick = () => {
         localStorage.setItem('displayName', displayNameInput.value.trim());
         alert('已儲存個人資料（localStorage）');
     };
 
-    // 換頭像
     avatarInput.onchange = () => {
         const file = avatarInput.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = e => {
             const data = e.target.result;
@@ -362,39 +373,68 @@
         reader.readAsDataURL(file);
     };
 
-    // 密碼更改
+    // 密碼更改：針對目前登入帳號
     const btnChangePwd = document.getElementById('btnChangePwd');
     const oldPwdInput = document.getElementById('old-password');
     const newPwdInput = document.getElementById('new-password');
     const confirmPwdInput = document.getElementById('confirm-password');
+    const currentUserInfo = document.getElementById('currentUserInfo');
+
+    let currentUser = localStorage.getItem('currentUser') || null;
+
+    function refreshCurrentUserLabel() {
+        if (!currentUser) {
+            currentUserInfo.textContent = '目前未偵測到登入帳號，請回首頁先登入再來更改密碼。';
+            btnChangePwd.disabled = true;
+            btnChangePwd.style.opacity = '0.6';
+        } else {
+            currentUserInfo.textContent = '目前登入帳號：' + currentUser;
+            btnChangePwd.disabled = false;
+            btnChangePwd.style.opacity = '1';
+        }
+    }
+    refreshCurrentUserLabel();
 
     btnChangePwd.onclick = () => {
-        const storedPwd = localStorage.getItem('loginPassword') || '1234'; // 預設舊密碼 1234
+        if (!currentUser) {
+            alert('尚未登入，無法變更密碼。');
+            return;
+        }
 
-        if (!oldPwdInput.value || !newPwdInput.value || !confirmPwdInput.value) {
+        const oldPwd = oldPwdInput.value;
+        const newPwd = newPwdInput.value;
+        const confirmPwd = confirmPwdInput.value;
+
+        if (!oldPwd || !newPwd || !confirmPwd) {
             alert('請把三個欄位都填寫完整');
             return;
         }
 
-        if (oldPwdInput.value !== storedPwd) {
+        let accounts = loadAccounts();
+        const idx = accounts.findIndex(a => a.username === currentUser);
+        if (idx === -1) {
+            alert('找不到目前帳號資料，請回首頁重新登入。');
+            return;
+        }
+
+        if (accounts[idx].password !== oldPwd) {
             alert('目前密碼錯誤');
             return;
         }
 
-        if (newPwdInput.value !== confirmPwdInput.value) {
+        if (newPwd !== confirmPwd) {
             alert('兩次新密碼不一致');
             return;
         }
 
-        // 寫入新的登入密碼
-        localStorage.setItem('loginPassword', newPwdInput.value);
+        accounts[idx].password = newPwd;
+        saveAccounts(accounts);
 
-        // 清空欄位
         oldPwdInput.value = '';
         newPwdInput.value = '';
         confirmPwdInput.value = '';
 
-        alert('密碼已更新，下次回到主頁登入請使用新密碼。');
+        alert('密碼已更新，下次登入請使用新密碼。');
     };
 </script>
 
